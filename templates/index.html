@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gợi ý món ăn</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Tìm kiếm món ăn</h2>
+        <input id="search" type="text" placeholder="Search for ingredients" onkeypress="handleKeyPress(event)">
+    </div>
+    <div class="food-list" id="food-list"></div>
+
+    <div id="foodModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <button onclick="showOverview()">Overview</button>
+            <button onclick="showIngredients()">Ingredients</button>
+            <button onclick="showInstructions()">Instructions</button>
+            <button id="videoButton" onclick="showVideo()">Video</button>
+            <h2 id="foodName"></h2>
+            <div id="foodDetails"></div>    
+        </div>
+    </div>
+
+    <script>
+        let currentFood = null;
+        // Function to display foods dynamically
+        function displayFoods(list) {
+            let foodList = document.getElementById("food-list");
+            foodList.innerHTML = "";
+            list.forEach(food => {
+                let div = document.createElement("div");
+                div.className = "food-card";
+                div.onclick = () => openModal(food);
+                div.innerHTML = `<img src="${food.image}" alt="${food.name}"><h3>${food.name}</h3>`;
+                foodList.appendChild(div);
+            });
+        }
+
+        // Open modal and show food details
+        function openModal(food) {
+            currentFood = food;
+            document.getElementById("foodName").innerText = currentFood.name;
+            document.getElementById("foodDetails").innerHTML = `
+                <img src="${currentFood.image}" alt="${currentFood.name}">
+                <div id="Details">
+                    <p><strong>Category:</strong> ${currentFood.category}</p>
+                    <p><strong>Area:</strong> ${currentFood.area}</p>
+                    ${currentFood.tags != "" ? `<div><strong>Tags:</strong> ${currentFood.tags.map(tag => `<span>${tag}</span>`).join(', ')}</div>` : ''}
+                </div>
+            `;            
+            document.getElementById("foodModal").style.display = "block";
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById("foodModal").style.display = "none";
+            stopVideo();
+        }
+
+        // Show Overview
+        function showOverview() {
+            openModal(currentFood);
+            stopVideo();
+        }
+
+        // Show Ingredients
+        function showIngredients() {
+            document.getElementById("foodDetails").innerHTML = 
+            `
+                <table style="width: 100%; text-align: left;">
+                    <thead>
+                        <tr>
+                            <th>Ingredient</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${currentFood.ingredients.map(ingredient => `
+                            <tr>
+                                <td>${ingredient.name}</td>
+                                <td>${ingredient.quantity}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            stopVideo();
+        }
+
+        // Show Instructions
+        function showInstructions() {
+            let count = 1;
+            document.getElementById("foodDetails").innerHTML = 
+            `
+                <table style="width: 100%; text-align: left;">
+                    <thead>
+                        <tr>
+                            <th>Step</th>
+                            <th>Instrucion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${currentFood.steps.map(step => `
+                            <tr>
+                                <td>${count++}</td>
+                                <td>${step.step}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            stopVideo();
+        }
+
+        // Show Video function
+        function showVideo() {
+            const videoUrl = currentFood.video;  // Assume videoUrl is the YouTube link
+            const videoId = videoUrl.split('v=')[1].split('&')[0];  // Extract YouTube video ID from the URL
+
+            document.getElementById("foodDetails").innerHTML = `
+                <div class="video-modal-content">
+                    <span class="close" onclick="closeVideoModal()">&times;</span>
+                    <iframe width="100%" height="315" 
+                            src="https://www.youtube.com/embed/${videoId}" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            `;
+        }
+
+        function stopVideo() {
+            const iframe = document.querySelector(".video-modal-content iframe");
+            if (iframe) {
+                iframe.src = iframe.src; // Reset the iframe src to stop the video
+            }
+        }
+
+        // Handle key press event
+        function handleKeyPress(event) {
+            if (event.key === "Enter") searchFood();
+        }
+
+        // Search food via API request
+        function searchFood() {
+            let query = document.getElementById("search").value;
+            fetch(`/search?query=${query}`)
+                .then(response => response.json())
+                .then(data => displayFoods(data))
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Load first 10 foods on page load
+        window.onload = function() {
+            fetch('/foods')
+                .then(response => response.json())
+                .then(data => displayFoods(data))
+                .catch(error => console.error('Error:', error));
+        };
+    </script>
+</body>
+</html>
