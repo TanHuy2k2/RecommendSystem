@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gợi ý món ăn</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=groups" />
 </head>
 <body>
     <div class="container">
@@ -35,21 +36,61 @@
                 let div = document.createElement("div");
                 div.className = "food-card";
                 div.onclick = () => openModal(food);
-                div.innerHTML = `<img src="${food.image}" alt="${food.name}"><h3>${food.name}</h3>`;
+                
+                // Create the structure of the card
+                div.innerHTML = `
+                    <img src="${food.image}" alt="${food.title}" class="food-image">
+                    <h3>${food.title}</h3>
+                    <div class="food-details">
+                        <span class="food-detail">
+                            <img src="{{ url_for('static', filename='images/people.svg') }}" alt="mini-image-1" class="mini-image">
+                            <p>${food.people}</p>
+                        </span>
+                        <span class="food-detail">
+                            <img src="{{ url_for('static', filename='images/chef_hat.svg') }}" alt="mini-image-2" class="mini-image">
+                            <p>${food.difficulty}</p>
+                        </span>
+                        <span class="food-detail">
+                            <img src="{{ url_for('static', filename='images/timer.svg') }}" alt="mini-image-3" class="mini-image">
+                            <p>${food.time}</p>
+                        </span>
+                    </div>
+                `;
+                
                 foodList.appendChild(div);
             });
+
         }
+        
+        const truncateDescription = (description) => {
+            const sentences = description.split('.'); // Tách câu theo dấu chấm
+            return sentences.length > 1 
+                ? sentences.slice(0, 1).join('.') + '...' // Lấy 2 câu đầu tiên và thêm dấu chấm
+                : description;
+        };
 
         // Open modal and show food details
         function openModal(food) {
             currentFood = food;
-            document.getElementById("foodName").innerText = currentFood.name;
+            document.getElementById("foodName").innerText = currentFood.title;
             document.getElementById("foodDetails").innerHTML = `
-                <img src="${currentFood.image}" alt="${currentFood.name}">
+                <img src="${currentFood.image}" alt="${currentFood.title}" class="modal-image">
                 <div id="Details">
-                    <p><strong>Category:</strong> ${currentFood.category}</p>
-                    <p><strong>Area:</strong> ${currentFood.area}</p>
-                    ${currentFood.tags != "" ? `<div><strong>Tags:</strong> ${currentFood.tags.map(tag => `<span>${tag}</span>`).join(', ')}</div>` : ''}
+                   <p>${truncateDescription(currentFood.description)}</p>
+                </div>
+                <div class="food-details">
+                    <span class="food-detail">
+                        <img src="{{ url_for('static', filename='images/people.svg') }}" alt="mini-image-1" class="mini-image">
+                        <p>${food.people}</p>
+                    </span>
+                    <span class="food-detail">
+                        <img src="{{ url_for('static', filename='images/chef_hat.svg') }}" alt="mini-image-2" class="mini-image">
+                        <p>${food.difficulty}</p>
+                    </span>
+                    <span class="food-detail">
+                        <img src="{{ url_for('static', filename='images/timer.svg') }}" alt="mini-image-3" class="mini-image">
+                        <p>${food.time}</p>
+                    </span>
                 </div>
             `;            
             document.getElementById("foodModal").style.display = "block";
@@ -77,11 +118,11 @@
                             <th>Ingredient</th>
                             <th>Quantity</th>
                         </tr>
-                    </thead>
+                    </thead>    
                     <tbody>
-                        ${currentFood.ingredients.map(ingredient => `
+                        ${currentFood.ingredients_processed.map(ingredient => `
                             <tr>
-                                <td>${ingredient.name}</td>
+                                <td style = "text-transform: capitalize;">${ingredient.name}</td>
                                 <td>${ingredient.quantity}</td>
                             </tr>
                         `).join('')}
@@ -95,23 +136,15 @@
         function showInstructions() {
             let count = 1;
             document.getElementById("foodDetails").innerHTML = 
-            `
-                <table style="width: 100%; text-align: left;">
-                    <thead>
-                        <tr>
-                            <th>Step</th>
-                            <th>Instrucion</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${currentFood.steps.map(step => `
-                            <tr>
-                                <td>${count++}</td>
-                                <td>${step.step}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+            `   
+                <strong>Chuẩn bị:</strong>
+                <p>${currentFood.preparation || "Không có thông tin"}</p>  
+                <strong>Thực hiện:</strong>
+                <p>${currentFood.execution || "Không có thông tin"}</p>  
+                <strong>Sử dụng:</strong>
+                <p>${currentFood.usage || "Không có thông tin"}</p> 
+                <strong>Mách nhỏ:</strong>
+                <p>${currentFood.tips || "Không có thông tin"}</p>       
             `;
             stopVideo();
         }
@@ -119,7 +152,7 @@
         // Show Video function
         function showVideo() {
             const videoUrl = currentFood.video;  // Assume videoUrl is the YouTube link
-            const videoId = videoUrl.split('v=')[1].split('&')[0];  // Extract YouTube video ID from the URL
+            const videoId = videoUrl.split('v=')[1].split('&')[0] || "Không có thông tin";  // Extract YouTube video ID from the URL
 
             document.getElementById("foodDetails").innerHTML = `
                 <div class="video-modal-content">

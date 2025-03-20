@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
-from extract_ingredient import extract_ingredient
+# from extract_ingredient import extract_ingredient
 from load_food import load_foods
-from knn import recommend_recipes
-from search_for_ingredient import recommend_dishes
+from knn import predict_recipe
+# from search_for_ingredient import recommend_dishes
 
 app = Flask(__name__)
 
@@ -20,15 +20,10 @@ def index():
 @app.route('/search', methods=['GET'])
 def search_food():
     query = request.args.get('query', '').lower()
-    recommended = recommend_recipes(query)
-    ingredients, quantities = extract_ingredient(query)
-    X = []
-    for i, j in zip(ingredients, quantities):
-      X.append({"name": i, "quantity": str(j)})
-    recommendations = recommend_dishes(X, df_main, limit=10)
+    recommended = predict_recipe(query)
 
-    common_ids = list(set(recommendations).intersection(recommended['id'].values))
-    results = [food for food in foods if food['id'] in common_ids]
+    common_ids = recommended['recipe_id'].values
+    results = [food for food in foods if food['recipe_id'] in common_ids]
     return jsonify(results)
 
 # Route to send the first 10 foods by default
