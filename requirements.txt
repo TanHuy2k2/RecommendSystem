@@ -1,3 +1,5 @@
 flask
-gunicorn
 sklearn
+pandas
+json
+gunicorn

@@ -32,4 +32,4 @@ def get_foods():
     return jsonify(foods[:10])
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
