@@ -10,7 +10,7 @@ df_main.head()
 
 df = df_main[["recipe_id", "ingredients"]]
 
-df['ingredients'] = df['ingredients'].apply(lambda x: ', '.join(x))
+df.loc[:, 'ingredients'] = df['ingredients'].apply(lambda x: ', '.join(x))
 
 
 # Sử dụng TfidfVectorizer để chuyển đổi nguyên liệu thành đặc trưng
