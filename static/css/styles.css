@@ -85,7 +85,7 @@ button:active {
     display: flex;
     flex-direction: column;
     align-items: center; 
-    margin: 0 20px 0 20px;
+    margin: 5px 20px 0 20px;
 }
 #foodDetails p {
     text-align: start;

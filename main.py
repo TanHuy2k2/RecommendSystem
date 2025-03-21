@@ -20,20 +20,26 @@ def index():
 @app.route('/search', methods=['GET'])
 def search_food():
     query = request.args.get('query', '').lower()
-    recommended = predict_recipe(query)
+    if query == '':
+        return jsonify(foods[:10])
+    else:
+        recommended = predict_recipe(query)
 
-    quantities, ingredients = extract_ingredient(query)
+        quantities, ingredients = extract_ingredient(query)
 
-    X = []
-    for i, j in zip(ingredients, quantities):
-       X.append({"name": i, "quantity": str(j)})
+        X = []
+        for i, j in zip(ingredients, quantities):
+            X.append({"name": i, "quantity": str(j)})
 
-    recommendations = recommend_dishes(X, df_main, limit=10)
- 
-    common_ids = list(set(recommendations).intersection(recommended['recipe_id'].values))
-    results = [food for food in foods if food['recipe_id'] in common_ids]
+        filtered_recipes = df_main.loc[df_main["recipe_id"].isin(recommended['recipe_id'].values), ["recipe_id", "ingredients_processed"]]
 
-    return jsonify(results)
+        recommendations = recommend_dishes(X, filtered_recipes)
+    
+        results = [food for food in foods if food['recipe_id'] in recommendations]
+
+        if results:
+            return jsonify(results)
+        return jsonify([])
 
 # Route to send the first 10 foods by default
 @app.route('/foods', methods=['GET'])
