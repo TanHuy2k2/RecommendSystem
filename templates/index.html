@@ -32,33 +32,38 @@
         function displayFoods(list) {
             let foodList = document.getElementById("food-list");
             foodList.innerHTML = "";
-            list.forEach(food => {
-                let div = document.createElement("div");
-                div.className = "food-card";
-                div.onclick = () => openModal(food);
-                
-                // Create the structure of the card
-                div.innerHTML = `
-                    <img src="${food.image}" alt="${food.title}" class="food-image">
-                    <h3>${food.title}</h3>
-                    <div class="food-details">
-                        <span class="food-detail">
-                            <img src="{{ url_for('static', filename='images/people.svg') }}" alt="mini-image-1" class="mini-image">
-                            <p>${food.people}</p>
-                        </span>
-                        <span class="food-detail">
-                            <img src="{{ url_for('static', filename='images/chef_hat.svg') }}" alt="mini-image-2" class="mini-image">
-                            <p>${food.difficulty}</p>
-                        </span>
-                        <span class="food-detail">
-                            <img src="{{ url_for('static', filename='images/timer.svg') }}" alt="mini-image-3" class="mini-image">
-                            <p>${food.time}</p>
-                        </span>
-                    </div>
-                `;
-                
-                foodList.appendChild(div);
-            });
+            
+            if (list != ""){
+                list.forEach(food => {
+                    let div = document.createElement("div");
+                    div.className = "food-card";
+                    div.onclick = () => openModal(food);
+                    
+                    // Create the structure of the card
+                    div.innerHTML = `
+                        <img src="${food.image}" alt="${food.title}" class="food-image">
+                        <h3>${food.title}</h3>
+                        <div class="food-details">
+                            <span class="food-detail">
+                                <img src="{{ url_for('static', filename='images/people.svg') }}" alt="mini-image-1" class="mini-image">
+                                <p>${food.people}</p>
+                            </span>
+                            <span class="food-detail">
+                                <img src="{{ url_for('static', filename='images/chef_hat.svg') }}" alt="mini-image-2" class="mini-image">
+                                <p>${food.difficulty}</p>
+                            </span>
+                            <span class="food-detail">
+                                <img src="{{ url_for('static', filename='images/timer.svg') }}" alt="mini-image-3" class="mini-image">
+                                <p>${food.time}</p>
+                            </span>
+                        </div>
+                    `;
+                    
+                    foodList.appendChild(div);
+                });
+            }else{
+                foodList.innerHTML = "<h3>Không tìm thấy món ăn phù hợp</h3>";
+            }
 
         }
         
@@ -192,7 +197,12 @@
         window.onload = function() {
             fetch('/foods')
                 .then(response => response.json())
-                .then(data => displayFoods(data))
+                .then(data =>{
+                    if (!data || data.length === 0) {
+                        displayFoods("");
+                    } else {
+                        displayFoods(data);
+                    }})
                 .catch(error => console.error('Error:', error));
         };
     </script>
