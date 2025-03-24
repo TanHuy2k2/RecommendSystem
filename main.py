@@ -4,11 +4,11 @@ from extract_ingredients import extract_ingredient
 from load_food import load_foods
 from knn import predict_recipe
 from search_for_ingredients import recommend_dishes
-from flask_cors import CORS
+# from flask_cors import CORS
 
 app = Flask(__name__)
 
-CORS(app)
+# CORS(app)
 
 foods = load_foods()
 
@@ -32,7 +32,10 @@ def search_food():
 
         X = []
         for i, j in zip(ingredients, quantities):
-            X.append({"name": i, "quantity": str(j)})
+            if j == "":
+                X.append({"name": i})
+            else:
+                X.append({"name": i, "quantity": str(j)})
 
         filtered_recipes = df_main.loc[df_main["recipe_id"].isin(recommended['recipe_id'].values), ["recipe_id", "ingredients_processed"]]
 
