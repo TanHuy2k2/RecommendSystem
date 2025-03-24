@@ -18,6 +18,7 @@ unit_conversion = {
 # --- Clean string ---
 def clean_quantity_str(q_str):
     q_str = q_str.strip()
+    q_str = q_str.replace(',', '.')
     q_str = re.sub(r'(\d)([a-zA-ZÀ-Ỵà-ỵ])', r'\1 \2', q_str)  # "1quả" ➜ "1 quả"
     q_str = q_str.split('(')[0].strip()
     q_str = q_str.split(':')[0].strip()
