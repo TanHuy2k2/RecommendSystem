@@ -4,8 +4,11 @@ from extract_ingredients import extract_ingredient
 from load_food import load_foods
 from knn import predict_recipe
 from search_for_ingredients import recommend_dishes
+from flask_cors import CORS
 
 app = Flask(__name__)
+
+CORS(app)
 
 foods = load_foods()
 
