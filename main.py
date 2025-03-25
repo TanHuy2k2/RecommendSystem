@@ -50,7 +50,7 @@ def search_food():
 # Route to send the first 10 foods by default
 @app.route('/foods', methods=['GET'])
 def get_foods():
-    return jsonify(foods[:10])
+    return jsonify(foods[:12])
 
 if __name__ == '__main__':
     app.run()

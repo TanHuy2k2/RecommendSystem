@@ -9,8 +9,47 @@
 </head>
 <body>
     <div class="container">
-        <h2>Tìm kiếm món ăn</h2>
-        <input id="search" type="text" placeholder="Tìm kiếm dựa trên nguyên liệu" onkeypress="handleKeyPress(event)">
+        <h2>Tìm kiếm món ăn dựa trên nguyên liệu</h2>
+        <div class="search-container">
+            <input id="search" type="text" placeholder="Tìm kiếm dựa trên nguyên liệu" onkeypress="handleKeyPress(event)">
+            <button class="search-btn" onclick="searchFood()">Tìm kiếm</button>
+        </div>
+        <h5>Chọn các món ăn:</h5>
+        <div class="category-container">
+            <div class="category">
+                <button class="category-btn" onclick="toggleDropdown('meat-dropdown')">Thịt</button>
+                <div class="dropdown-content" id="meat-dropdown">
+                    <button class="dropdown-item" onclick="selectItem(this)">Thịt bò</button>
+                    <button class="dropdown-item" onclick="selectItem(this)">Thịt heo</button>
+                    <button class="dropdown-item" onclick="selectItem(this)">Thịt gà</button>
+                    <button class="dropdown-item" onclick="selectItem(this)">Thịt cừu</button>
+                </div>
+            </div>
+        
+            <div class="category">
+                <button class="category-btn" onclick="toggleDropdown('seafood-dropdown')">Hải sản</button>
+                <div class="dropdown-content" id="seafood-dropdown">
+                    <button class="dropdown-item" onclick="selectItem(this)">Cá</button>
+                    <button class="dropdown-item" onclick="selectItem(this)">Tôm</button>
+                    <button class="dropdown-item" onclick="selectItem(this)">Mực</button>
+                </div>
+            </div>
+
+            <div class="category">
+                <button class="category-btn" onclick="toggleDropdown('vegetable-dropdown')">Rau củ</button>
+                <div class="dropdown-content" id="vegetable-dropdown">
+                    <button class="dropdown-item" onclick="selectItem(this)">Rau húng</button>
+                    <button class="dropdown-item" onclick="selectItem(this)">Rau muống</button>
+                    <button class="dropdown-item" onclick="selectItem(this)">Rau răm</button>
+                    <button class="dropdown-item" onclick="selectItem(this)">khoai tây</button>
+                    <button class="dropdown-item" onclick="selectItem(this)">Cà rốt</button>
+                    <button class="dropdown-item" onclick="selectItem(this)">Hành</button>
+                </div>
+            </div>
+
+        </div>
+        
+        <div id="selected-items"></div> <!-- Hiển thị các danh mục đã chọn -->
     </div>
     <div class="food-list" id="food-list"></div>
 
@@ -28,6 +67,46 @@
 
     <script>
         let currentFood = null;
+        let selectedItemsText = "";
+
+        function toggleDropdown(dropdownId) {
+            let dropdown = document.getElementById(dropdownId);
+            let allDropdowns = document.querySelectorAll(".dropdown-content");
+
+            // Đóng tất cả các dropdown khác trước khi mở cái được nhấn
+            allDropdowns.forEach((el) => {
+                if (el.id !== dropdownId) {
+                    el.style.display = "none";
+                }
+            });
+
+            // Hiển thị hoặc ẩn dropdown được nhấn
+            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+        }
+
+        function selectItem(button) {
+            button.classList.toggle("selected");
+
+            updateSelectedItems();
+        }
+
+        function updateSelectedItems() {
+            let selectedItems = [];
+            document.querySelectorAll(".dropdown-item.selected").forEach(btn => {
+                selectedItems.push(btn.innerText);
+            });
+
+            selectedItemsText = selectedItems.length ? selectedItems.join(", "): "";
+
+            if (selectedItems.length === 0) {
+                document.getElementById("selected-items").innerHTML = "";
+            }
+            else{
+                searchFood();
+                document.getElementById("selected-items").innerHTML = "Đã chọn: " + selectedItemsText;
+            }
+        }
+
         // Function to display foods dynamically
         function displayFoods(list) {
             let foodList = document.getElementById("food-list");
@@ -188,6 +267,12 @@
         // Search food via API request
         function searchFood() {
             let query = document.getElementById("search").value;
+
+            if (query != ""){
+                query = selectedItemsText +", " + query;
+            }else{
+                query = selectedItemsText;
+            }
             fetch(`/search?query=${query}`)
                 .then(response => response.json())
                 .then(data => {
@@ -207,6 +292,14 @@
                 .then(data =>displayFoods(data))
                 .catch(error => console.error('Error:', error));
         };
+
+        document.addEventListener("click", function (event) {
+            if (!event.target.closest(".category-btn") && !event.target.closest(".dropdown-content")) {
+                document.querySelectorAll(".dropdown-content").forEach(menu => {
+                    menu.style.display = "none";
+                });
+            }
+        });
     </script>
 </body>
 </html>
