@@ -1,6 +1,6 @@
 from convert_quantity import convert_quantity
 
-def recommend_dishes(user_ingredients, df):
+def recommend_dishes(user_ingredients, df, threshold=1):
     recommended_dishes = []
     
     # Tiền xử lý danh sách nguyên liệu của người dùng để giảm số lần gọi hàm
@@ -26,7 +26,7 @@ def recommend_dishes(user_ingredients, df):
                         matched_ingredients.add(key)  # Chỉ thêm nếu hợp lệ
 
         # Kiểm tra xem có đủ tất cả nguyên liệu người dùng nhập không
-        if len(matched_ingredients) == total_ingredients:
+        if len(matched_ingredients) / total_ingredients >= threshold:
             recommended_dishes.append(dish_id)
 
     return recommended_dishes

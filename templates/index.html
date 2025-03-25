@@ -46,7 +46,7 @@
                     <button class="dropdown-item" onclick="selectItem(this)">Hành</button>
                 </div>
             </div>
-
+            <button class="clear-btn" onclick="clearSelection()">Clear</button>
         </div>
         
         <div id="selected-items"></div> <!-- Hiển thị các danh mục đã chọn -->
@@ -64,6 +64,8 @@
             <div id="foodDetails"></div>    
         </div>
     </div>
+
+    <div class="food-container" id="food-container"></div>
 
     <script>
         let currentFood = null;
@@ -107,6 +109,11 @@
             }
         }
 
+        function clearSelection() {
+            let selectedButtons = document.querySelectorAll(".dropdown-item.selected");
+            selectedButtons.forEach(button => button.classList.remove("selected"));
+            updateSelectedItems();
+        }
         // Function to display foods dynamically
         function displayFoods(list) {
             let foodList = document.getElementById("food-list");
@@ -141,7 +148,7 @@
                     foodList.appendChild(div);
                 });
             }else{
-                foodList.innerHTML = "<h3>Không tìm thấy món ăn phù hợp</h3>";
+                foodList.innerHTML = "<h3>Không tìm thấy món ăn nào phù hợp với các nguyên liệu bạn đưa ra.</h3>";
             }
 
         }
@@ -194,24 +201,40 @@
 
         // Show Ingredients
         function showIngredients() {
+            const fixedIngredients = currentFood.ingredients_processed.filter(item => item.quantity !== "*");
+            // Lọc ra các nguyên liệu có quantity là "tuỳ chọn"
+            const optionalIngredients = currentFood.ingredients_processed
+                .filter(item => item.quantity === "*")
+                .map(item => item.name)
+                .join(", ");
+            console.log(optionalIngredients);
             document.getElementById("foodDetails").innerHTML = 
             `
-                <p class="a-note"><strong>Ghi chú:</strong> M: muỗng canh - m: muỗng cafe</p>
-                <table style="width: 100%; text-align: left;">
+                <table style="width: 100%; text-align: left; border-spacing: 3px">
                     <thead>
+                        <tr>
+                            <td><strong>Ghi chú:</strong> M: muỗng canh - m: muỗng cafe</td>
+                        </tr> 
+                        <tr>
+                            <td>*: Tuỳ vào khẩu vị của từng người.</td>
+                        </tr>
                         <tr>
                             <th>Nguyên liệu</th>
                             <th>Số lượng</th>
                         </tr>
                     </thead>    
                     <tbody>
-                        ${currentFood.ingredients_processed.map(ingredient => `
+                       ${fixedIngredients.map(item => `
                             <tr>
-                                <td style = "text-transform: capitalize;">${ingredient.name}</td>
-                                <td>${ingredient.quantity}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
+                                <td style="text-transform: capitalize;">${item.name}</td>
+                                <td>${item.quantity}</td>
+                            </tr>`).join("")}
+                            ${optionalIngredients ? `
+                            <tr>
+                                <td style="text-transform: capitalize;">${optionalIngredients}</td>
+                                <td>*</td>
+                            </tr>` : ""}
+                    </tbody> 
                 </table>
             `;
             stopVideo();
@@ -278,11 +301,55 @@
                 .then(data => {
                     if (data.length === 0) {
                         displayFoods("");
+                        displayFoodList(query);
                     } else{
                         displayFoods(data);
                     }
                 })
                 .catch(error => console.error('Error:', error));
+        }
+
+        function createFoodCard(food) {
+            const div = document.createElement("div");
+            div.classList.add("food-box");
+            div.onclick = () => openModal(food);
+            div.innerHTML = `
+                <img src="${food.image}" alt="${food.title}" class="food-rc-image">
+                <h3>${food.title}</h3>
+                <div class="food-rc-details">
+                    <span class="food-rc-detail">
+                        <img src="{{ url_for('static', filename='images/people.svg') }}" alt="mini-image-1" class="mini-image">
+                        <p>${food.people}</p>
+                    </span>
+                    <span class="food-rc-detail">
+                        <img src="{{ url_for('static', filename='images/chef_hat.svg') }}" alt="mini-image-2" class="mini-image">
+                        <p>${food.difficulty}</p>
+                    </span>
+                    <span class="food-rc-detail">
+                        <img src="{{ url_for('static', filename='images/timer.svg') }}" alt="mini-image-3" class="mini-image">
+                        <p>${food.time}</p>
+                    </span>
+                </div>
+            `;
+            return div;
+        }
+        async function displayFoodList(query) {
+            const foodContainer = document.getElementById("food-container");
+            foodContainer.innerHTML = ""; // Xóa nội dung cũ
+
+            // Thêm dòng tiêu đề phía trên
+            const titleDiv = document.createElement("div");
+            titleDiv.classList.add("food-title");
+            titleDiv.innerText = "Đề xuất các món liên quan";
+            foodContainer.appendChild(titleDiv);
+
+            const response = await fetch(`/recommend?query=${query}`);
+            const foodArray = await response.json();
+            // Hiển thị các món ăn
+            foodArray.forEach(food => {
+                const foodCard = createFoodCard(food);
+                foodContainer.appendChild(foodCard);
+            });
         }
 
         // Load first 10 foods on page load
