@@ -1,6 +1,6 @@
 from convert_quantity import convert_quantity
 
-def recommend_dishes(user_ingredients, df, threshold=1):
+def recommend_dishes(user_ingredients, df):
     recommended_dishes = []
     
     # Tiền xử lý danh sách nguyên liệu của người dùng để giảm số lần gọi hàm

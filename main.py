@@ -24,7 +24,7 @@ def index():
 def search_food():
     query = request.args.get('query', '').lower()
     if query == '':
-        return jsonify(foods[:10])
+        return jsonify(foods[:12])
     else:
         recommended = predict_recipe(query)
 
