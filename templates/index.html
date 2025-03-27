@@ -16,36 +16,18 @@
         </div>
         <h5>Chọn các món ăn:</h5>
         <div class="category-container">
+            {% for category, items in categories.items() %}
             <div class="category">
-                <button class="category-btn" onclick="toggleDropdown('meat-dropdown')">Thịt</button>
-                <div class="dropdown-content" id="meat-dropdown">
-                    <button class="dropdown-item" onclick="selectItem(this)">Thịt bò</button>
-                    <button class="dropdown-item" onclick="selectItem(this)">Thịt heo</button>
-                    <button class="dropdown-item" onclick="selectItem(this)">Thịt gà</button>
-                    <button class="dropdown-item" onclick="selectItem(this)">Thịt cừu</button>
+                <button class="category-btn" onclick="toggleDropdown('dropdown-{{ loop.index }}')">{{ category }}</button>
+                <div class="dropdown-content" id="dropdown-{{ loop.index }}">
+                    {% for item in items %}
+                    <button class="dropdown-item" onclick="selectItem(this)">{{ item }}</button>
+                    {% endfor %}
                 </div>
             </div>
-        
-            <div class="category">
-                <button class="category-btn" onclick="toggleDropdown('seafood-dropdown')">Hải sản</button>
-                <div class="dropdown-content" id="seafood-dropdown">
-                    <button class="dropdown-item" onclick="selectItem(this)">Cá</button>
-                    <button class="dropdown-item" onclick="selectItem(this)">Tôm</button>
-                    <button class="dropdown-item" onclick="selectItem(this)">Mực</button>
-                </div>
-            </div>
-
-            <div class="category">
-                <button class="category-btn" onclick="toggleDropdown('vegetable-dropdown')">Rau củ</button>
-                <div class="dropdown-content" id="vegetable-dropdown">
-                    <button class="dropdown-item" onclick="selectItem(this)">Rau húng</button>
-                    <button class="dropdown-item" onclick="selectItem(this)">Rau muống</button>
-                    <button class="dropdown-item" onclick="selectItem(this)">Rau răm</button>
-                    <button class="dropdown-item" onclick="selectItem(this)">khoai tây</button>
-                    <button class="dropdown-item" onclick="selectItem(this)">Cà rốt</button>
-                    <button class="dropdown-item" onclick="selectItem(this)">Hành</button>
-                </div>
-            </div>
+            {% endfor %}
+            
+            
             <button class="clear-btn" onclick="clearSelection()">Clear</button>
         </div>
         
@@ -304,6 +286,8 @@
                         displayFoodList(query);
                     } else{
                         displayFoods(data);
+                        const foodContainer = document.getElementById("food-container");
+                        foodContainer.innerHTML = "";
                     }
                 })
                 .catch(error => console.error('Error:', error));

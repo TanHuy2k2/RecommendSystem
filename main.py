@@ -4,6 +4,7 @@ from extract_ingredients import extract_ingredient
 from load_food import load_foods
 from knn import predict_recipe
 from search_for_ingredients import recommend_dishes
+from categories import get_categories
 # from flask_cors import CORS
 
 app = Flask(__name__)
@@ -17,7 +18,8 @@ df_main = pd.DataFrame(foods)
 # Route to render the HTML page
 @app.route('/')
 def index():
-    return render_template('index.html')
+    category = get_categories()
+    return render_template('index.html', categories=category)
 
 # Route to handle the search request
 @app.route('/search', methods=['GET'])
